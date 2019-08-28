@@ -1,4 +1,8 @@
-@import url(https://fonts.googleapis.com/css?family=Nunito);@charset "UTF-8";
+@charset "UTF-8";
+
+/* Variables */
+
+/* Bootstrap */
 
 /*!
  * Bootstrap v4.3.1 (https://getbootstrap.com/)
@@ -34,7 +38,7 @@
   --breakpoint-md: 768px;
   --breakpoint-lg: 992px;
   --breakpoint-xl: 1200px;
-  --font-family-sans-serif: "Nunito", sans-serif;
+  --font-family-sans-serif: "Comfortaa", sans-serif;
   --font-family-monospace: SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
 }
 
@@ -66,7 +70,7 @@ section {
 
 body {
   margin: 0;
-  font-family: "Nunito", sans-serif;
+  font-family: "Comfortaa", sans-serif;
   font-size: 0.9rem;
   font-weight: 400;
   line-height: 1.6;
@@ -6139,7 +6143,7 @@ a.close.disabled {
   z-index: 1070;
   display: block;
   margin: 0;
-  font-family: "Nunito", sans-serif;
+  font-family: "Comfortaa", sans-serif;
   font-style: normal;
   font-weight: 400;
   line-height: 1.6;
@@ -6264,7 +6268,7 @@ a.close.disabled {
   z-index: 1060;
   display: block;
   max-width: 276px;
-  font-family: "Nunito", sans-serif;
+  font-family: "Comfortaa", sans-serif;
   font-style: normal;
   font-weight: 400;
   line-height: 1.6;
@@ -10642,5 +10646,41 @@ a.text-dark:focus {
     color: inherit;
     border-color: #dee2e6;
   }
+}
+
+#app {
+  position: relative;
+  height: 100vh;
+  width: 100vw;
+  font-family: "Comfortaa", sans-serif;
+}
+
+main {
+  height: 100%;
+  width: 100%;
+}
+
+#home {
+  color: #444;
+  height: 100%;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+}
+
+#home h1 {
+  font-weight: 700;
+  text-shadow: 0px 12px 18px rgba(0, 0, 0, 0.075);
+}
+
+nav {
+  position: fixed;
+  right: 0;
+  margin: 1.5em 2.3em;
+}
+
+nav a {
+  color: #444;
 }
 

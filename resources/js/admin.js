@@ -3,7 +3,7 @@
  * includes Vue and other libraries. It is a great starting point when
  * building robust, powerful web applications using Vue and Laravel.
  */
-/*
+
 require('./bootstrap');
 
 window.Vue = require('vue');
@@ -41,19 +41,25 @@ tinymce.init({
 	skin: false
 });
 
-import mapboxgl from 'mapbox-gl/dist/mapbox-gl';
-import 'mapbox-gl/dist/mapbox-gl.css';
- 
-mapboxgl.accessToken = 'pk.eyJ1IjoiYS1icm9va2VzIiwiYSI6ImNqenRmajM0cTA0dnMzYm55NG9iNWc4cmEifQ.T_9Qw2CRjJntF5eyn2sIKg';
-var map = new mapboxgl.Map({
-	container: 'mapbox',
-	style: 'mapbox://styles/mapbox/streets-v11',
-	center: [145.7781, -16.9186], // starting position
-	zoom: 11 // starting zoom
-});
+	import mapboxgl from 'mapbox-gl/dist/mapbox-gl';
+	import 'mapbox-gl/dist/mapbox-gl.css';
+	 
+if( $('#mapbox')[0] ){
+	mapboxgl.accessToken = 'pk.eyJ1IjoiYS1icm9va2VzIiwiYSI6ImNqenRmajM0cTA0dnMzYm55NG9iNWc4cmEifQ.T_9Qw2CRjJntF5eyn2sIKg';
+	var map = new mapboxgl.Map({
+		container: 'mapbox',
+		style: 'mapbox://styles/mapbox/streets-v11',
+		center: [145.7781, -16.9186], // starting position
+		zoom: 11 // starting zoom
+	});
 
-map.on('click', function(e){
-	document.querySelector('input[name="lng"]').value = e.lngLat.lng;
-	document.querySelector('input[name="lat"]').value = e.lngLat.lat;
-});
+	map.on('click', function(e){
+		document.querySelector('input[name="lng"]').value = e.lngLat.lng;
+		document.querySelector('input[name="lat"]').value = e.lngLat.lat;
+	});
+	
+	map.on('load', function(){
+		map.resize();
+	});
 
+}

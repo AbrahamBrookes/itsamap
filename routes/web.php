@@ -11,19 +11,25 @@
 |
 */
 
+Route::prefix('dashboard')->middleware('auth')->group(function(){
+	
+	Route::get('/', function () {
+		return view('admin.dashboard');
+	});
+
+	Route::resource('maps', 'MapPointersController');
+	
+});
+
+
 Route::get('/', function () {
-    return view('welcome');
+    return view('home');
+});
+Route::get('home', function () {
+    return view('home');
 });
 
-Route::get('dashboard', function () {
-    return view('admin.dashboard');
-});
-Route::get('dashboard/map', function () {
-    return view('admin.map');
-});
-
-Route::resource('dashboard/maps', 'MapPointersController');
 
 Auth::routes();
 
-Route::get('/home', 'HomeController@index')->name('home');
+//Route::get('/home', 'HomeController@index')->name('home');

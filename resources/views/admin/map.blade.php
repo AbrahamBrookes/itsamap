@@ -1,12 +1,14 @@
 @extends('admin.layouts.main')
 
 @section('head')
-<link href='https://api.tiles.mapbox.com/mapbox-gl-js/v1.2.1/mapbox-gl.css' rel='stylesheet' />
-
+	@parent
+	
+	<!-- mapbox-gl -->
+	<link href='https://api.tiles.mapbox.com/mapbox-gl-js/v1.2.1/mapbox-gl.css' rel='stylesheet' />
 @endsection
 
 
-@section('content')
+@section('map')
 
 <div id=mapbox>
 </div>
