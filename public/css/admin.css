@@ -1,0 +1,49 @@
+* {
+  font-family: "Nunito";
+}
+
+p,
+ul,
+ol,
+li,
+div,
+span {
+  color: #222;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  color: #000;
+}
+
+nav {
+  background-color: #F4F7FB;
+}
+
+header {
+  display: flex;
+  font-size: 1rem;
+  padding: 0.25em;
+}
+
+header .logo-icon {
+  display: inline-block;
+  height: 48px;
+  width: 48px;
+}
+
+header h1 {
+  display: inline-block;
+  font-size: 1.5em;
+  margin-bottom: 0;
+}
+
+#mapbox {
+  height: 40vh;
+  width: 100%;
+}
+
