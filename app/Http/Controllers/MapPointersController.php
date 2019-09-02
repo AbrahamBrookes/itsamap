@@ -1,15 +1,15 @@
 <?php
 
-				/*
-				Verb			URI						Action				Route Name				desc
-				GET				/photos					index				photos.index			Display a listing of the resource.
-				GET				/photos/create			create				photos.create			Show the form for creating a new resource.
-				POST			/photos					store				photos.store			Store a newly created resource in storage.
-				GET				/photos/{photo}			show				photos.show				Display the specified resource.
-				GET				/photos/{photo}/edit	edit				photos.edit				Show the form for editing the specified resource.
-				PUT/PATCH		/photos/{photo}			update				photos.update			Update the specified resource in storage.
-				DELETE			/photos/{photo}			destroy				photos.destroy			Remove the specified resource from storage.
-				*/
+/*
+Verb			URI						Action				Route Name				desc
+GET				/photos					index				photos.index			Display a listing of the resource.
+GET				/photos/create			create				photos.create			Show the form for creating a new resource.
+POST			/photos					store				photos.store			Store a newly created resource in storage.
+GET				/photos/{photo}			show				photos.show				Display the specified resource.
+GET				/photos/{photo}/edit	edit				photos.edit				Show the form for editing the specified resource.
+PUT/PATCH		/photos/{photo}			update				photos.update			Update the specified resource in storage.
+DELETE			/photos/{photo}			destroy				photos.destroy			Remove the specified resource from storage.
+*/
 
 namespace App\Http\Controllers;
 
@@ -45,8 +45,10 @@ class MapPointersController extends Controller
      */
     public function store(Request $request)
     {
-        //
-		return 'wer';
+        $point = new \App\MapPointer();
+		$point->fill($request->all());
+		$point->save();
+		return redirect('/dashboard/maps/'.$request->map_id);
     }
 
     /**

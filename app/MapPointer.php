@@ -11,6 +11,11 @@ class MapPointer extends Model
 		"title",
 		"content",
 		"lng",
-		"lat"
+		"lat",
+		"map_id"
 	];
+	
+	public function map(){
+		return $this->belongsTo('\App\Map');
+	}
 }

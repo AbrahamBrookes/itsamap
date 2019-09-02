@@ -14,10 +14,18 @@
 Route::prefix('dashboard')->middleware('auth')->group(function(){
 	
 	Route::get('/', function () {
-		return view('admin.dashboard');
+		
+		$maps = Auth::user()->maps;
+		return view('admin.dashboard', [
+			'maps' => $maps,
+		]);
 	});
+	
 
-	Route::resource('maps', 'MapPointersController');
+	Route::resources([
+		'maps' 		=> 'MapsController',
+		'pointers' 	=> 'MapPointersController'
+	]);
 	
 });
 
