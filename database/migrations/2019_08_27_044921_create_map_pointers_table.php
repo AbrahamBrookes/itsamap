@@ -17,7 +17,7 @@ class CreateMapPointersTable extends Migration
             $table->bigIncrements('id');
             $table->timestamps();
 			$table->string('title', 255);
-			$table->text('content');
+			$table->text('content')->nullable;
 			$table->decimal('lng', 10, 7);
 			$table->decimal('lat', 10, 7);
         });

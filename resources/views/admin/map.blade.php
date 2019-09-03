@@ -12,20 +12,25 @@
 	@section('map')
 	<div class="container my-5">
 		<div class=row>
-			<div id=map-and-app class="col-12 relative overflow-hidden">
+			<div id=map-and-app v-bind:class="{'editing': form_shown, 'paused': pauseEdit }" class="col-12 relative overflow-hidden">
+				<h1>{{$map->name}} <span class="small float-right">Make public <div class=checkbox :data-checked="published" @click="setMapPublicStatus(!published)"></div></span></h1>
 				<div id=mapbox>
 				
 				</div>
 				<div id=app>
-					<h3>
-						Map pointer details
-						<a href="javascript:void(0)" class="float-right toggle-pointer-form"><i class=icon-down-open></i></a>
-					</h3>
+					<p>
+						<strong v-bind:class="{'d-none': mode != 'create'}">New pointer</strong>
+						<strong v-bind:class="{'d-none': mode == 'create'}">Edit pointer</strong>
+						<a href="javascript:void(0)" class="float-right d-lg-none" @click="pauseEdit = !pauseEdit"><i class=icon-down-open></i></a>
+					</p>
+					<p class=small>Change the location of this pointer by dragging the big marker around the map. Hit 'save' to save the markers location and details.</p>
+				
 					<form class=form-group action="/dashboard/pointers" method=POST>
 						@csrf
 						<input type=hidden v-model=lng name=lng />
 						<input type=hidden v-model=lat name=lat />
 						<input type=hidden name=map_id value="{{$map->id}}"/>
+						<input type=hidden name=map_public value="{{$map->published == 1 ? 'true' : '' }}"/>
 						<div class=form-group>
 							<label for=title>Title</label>
 							<input v-model="title" class=form-control name=title required />
@@ -50,13 +55,11 @@
 			<div class=col-12>
 				<h2 class=section-heading>
 					Map features
-					<a class="float-right add-pointer activate-pointer-form" href="javascript:void(0)"><i class=icon-plus-circled></i> Add new</a>
+					<a class="float-right small add-pointer activate-pointer-form" href="javascript:void(0)"><i class=icon-plus-circled></i> <span class="d-none d-md-inline">Add new</span></a>
 				</h2>
 			@if( $pointers )
 				@foreach( $pointers as $pointer )
-					<div class=col-12>
-					{{$pointer->title}}
-					</div>
+					<a href='javascript:void(0)' class="list-item pointer-list-item" data-id="{{$pointer->id}}" data-lng="{{$pointer->lng}}" data-lat="{{$pointer->lat}}">{{$pointer->title}}</a>
 				@endforeach
 			@endif
 		</div>

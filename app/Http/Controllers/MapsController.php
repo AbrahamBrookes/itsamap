@@ -86,7 +86,9 @@ class MapsController extends Controller
      */
     public function update(Request $request, $id)
     {
-        //
+        $map = \App\Map::find($id);
+		$map->update($request->all());
+		return 'success';
     }
 
     /**

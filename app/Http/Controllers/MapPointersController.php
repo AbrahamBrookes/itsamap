@@ -59,7 +59,8 @@ class MapPointersController extends Controller
      */
     public function show($id)
     {
-        //
+        $pointer = \App\MapPointer::find($id);
+		return $pointer->toJson();
     }
 
     /**
@@ -82,7 +83,10 @@ class MapPointersController extends Controller
      */
     public function update(Request $request, $id)
     {
-        //
+        $pointer = \App\MapPointer::find($id);
+        $pointer->fill($request->all());
+		$pointer->save();
+		return 'success';
     }
 
     /**

@@ -9,6 +9,7 @@ class Map extends Model
 	
 	protected $fillable = [
 		'name',
+		'published'
 	];
 	
     public function pointers(){

@@ -48,24 +48,100 @@ tinymce.init({
 	import mapboxgl from 'mapbox-gl/dist/mapbox-gl';
 	import 'mapbox-gl/dist/mapbox-gl.css';
 
+
+
+/**
+	default lng lats
+*/
+const defaultLngLat = {
+	lng: 145.7709605789372,
+	lat: -16.92034149005744
+};
+const defaultPointer = {
+	id: 0,
+	lng: defaultLngLat.lng,
+	lat: defaultLngLat.lat,
+	title: '',
+	content: ''
+}
+
+
 document.addEventListener( 'DOMContentLoaded', function(){
 	if( $('#mapbox')[0] ){
 		
-		const app = new Vue({
-			el: '#app',
+		
+		
+		window.app = new Vue({
+			el: '#map-and-app',
 			data: {
-				id: 0,
-				lng: 145.7709605789372,
-				lat: -16.92034149005744,
-				title: '',
-				content: '',
+				id: defaultPointer.id,
+				lng: defaultPointer.lng,
+				lat: defaultPointer.lat,
+				title: defaultPointer.title,
+				content: defaultPointer.content,
+				published: $('input[name="map_public"]').val(), // this feels lazy
+				form_shown: false,
+				pauseEdit: false,
+				mode: 'create',
 				mceConfig: {
 					height: 300,
 					inline: false,
 					theme: 'silver',
+					menubar: 'format',
 					fontsize_formats: "8px 10px 12px 14px 16px 18px 20px 22px 24px 26px 28px 30px 34px 38px 42px 48px 54px 60px",
-					toolbar1: 'formatselect | link | alignleft aligncenter alignright alignjustify  | numlist bullist outdent indent  | removeformat',
+					toolbar1: '',
 					image_advtab: true,
+				},
+				editmode: false,
+				marker: {}
+			},
+			methods: {
+				// retrieve the given pointer from the server and assign it to the vue instance
+				fetchPointer: function(id){
+					let self = this;
+					return new Promise((resolve, reject) => {
+						axios.get('/dashboard/pointers/'+id).then(
+							function(response){
+								// assign the data
+								Object.assign(self.$data, response.data);
+								// show the marker
+								window.marker.setLngLat([ self.lng, self.lat ]);
+								window.map.flyTo({
+									center: [ self.lng, self.lat ]
+								});
+								resolve(response.data); // resolve the promise and return the pointer data
+							}
+						)
+					});
+				},
+				// save the currently active pointer
+				savePointer: function(){
+					let self = this;
+					return new Promise((resolve, reject) => {
+						// save the given pointer to the server
+						axios.patch('/dashboard/pointers/'+self.id, self.$data).then(
+							function(response){
+								self.editmode = false;
+								self.form_shown = false;
+								resolve(response);
+							}
+						)
+					});
+				},
+				// set the map to public or not public, for displaying on the front page
+				setMapPublicStatus: function( status ){
+					let self = this;
+					self.published = status;
+					let map_id = $('input[name="map_id"]').val();
+					return new Promise((resolve, reject) => {
+						// save the given pointer to the server
+						axios.patch('/dashboard/maps/'+map_id, {'published':status}).then(
+							function(response){
+								self.published = status;
+								resolve(response);
+							}
+						)
+					});
 				}
 			}
 		});
@@ -74,7 +150,7 @@ document.addEventListener( 'DOMContentLoaded', function(){
 		mapboxgl.accessToken = 'pk.eyJ1IjoiYS1icm9va2VzIiwiYSI6ImNqenRmajM0cTA0dnMzYm55NG9iNWc4cmEifQ.T_9Qw2CRjJntF5eyn2sIKg';
 		window.map = new mapboxgl.Map({
 			container: 'mapbox',
-			style: 'mapbox://styles/mapbox/streets-v11',
+			style: 'mapbox://styles/a-brookes/ck03qitqx1cal1cqcrmvl454z',
 			center: [145.7781, -16.9186], // starting position
 			zoom: 11 // starting zoom
 		});
@@ -89,9 +165,9 @@ document.addEventListener( 'DOMContentLoaded', function(){
 			markerWrap.id = 'map-marker-wrap';
 			var marker = document.createElement('div');
 			marker.id = "the-map-marker";
-			marker.classList.add('mapMarker'); // start the marker hidden
+			marker.classList.add('mapMarker');
 			markerWrap.appendChild( marker );
-			var marker = new mapboxgl.Marker({
+			window.marker = new mapboxgl.Marker({
 				element: markerWrap,
 				draggable: true,
 				anchor: 'bottom'
@@ -103,37 +179,134 @@ document.addEventListener( 'DOMContentLoaded', function(){
 			.setLngLat([app.lng, app.lat])
 			.addTo(map);
 			
+			// we'll also add a layer with all the map markers a' la
+			// https://docs.mapbox.com/mapbox-gl-js/example/popup-on-hover/
+			// by looping through the in-DOM .pointer-list-items, reading their
+			// datasets and creating a mapbox-friendly geoJSON source.
+			// saves a round trip to the server for this data
+			var pointers = {  
+				"type":"FeatureCollection",
+				"features":[]
+			};
+			$('.pointer-list-item').each( function(index){
+				var pointer = this;
+				pointers.features.push({  
+					"type":"Feature",
+					"properties":{  
+						"id": pointer.dataset.id,
+						"title": pointer.innerText,
+						"lng": pointer.dataset.lng,
+						"lat": pointer.dataset.lat,
+					},
+					"geometry":{  
+						"type":"Point",
+						"coordinates":[  
+							pointer.dataset.lng,
+							pointer.dataset.lat
+						]
+					}
+				});
+			});
+			map.addLayer({
+				id: 'allPointers',
+				type: 'symbol',
+				// Add a GeoJSON source containing place coordinates and information.
+				source: {
+					type: 'geojson',
+					data: pointers
+				},
+				layout: {
+					'icon-image': 'marker-15',
+					'icon-allow-overlap': true,
+				}
+			});
 			
+			
+			// when we click on a pointer on the map, show the edit form for that pointer
+			map.on('click', 'allPointers', function(e) {
+				var pointerid = e.features[0].properties.id;
+				app.fetchPointer(pointerid).then(
+					function(){
+						app.form_shown = true;					
+						app.mode = 'edit'; // will update the existing pointer on form submit
+					}
+				);
+			});
+			
+			// when we hover a pointer, show a popup with its title
+			var popup = new mapboxgl.Popup({
+				closeButton: false,
+				closeOnClick: false
+			});
+			map.on('mouseenter', 'allPointers', function(e) {
+				// Change the cursor style as a UI indicator.
+				map.getCanvas().style.cursor = 'pointer';
+				 
+				var coordinates = e.features[0].geometry.coordinates.slice();
+				var title = e.features[0].properties.title;
+				 
+				// Ensure that if the map is zoomed out such that multiple
+				// copies of the feature are visible, the popup appears
+				// over the copy being pointed to.
+				while (Math.abs(e.lngLat.lng - coordinates[0]) > 180) {
+					coordinates[0] += e.lngLat.lng > coordinates[0] ? 360 : -360;
+				}
+			 
+				// Populate the popup and set its coordinates
+				// based on the feature found.
+				popup.setLngLat(coordinates)
+				.setHTML('<h5 class=m-0>' + title + '<h5>')
+				.addTo(map);
+			});
+			map.on('mouseleave', 'allPointers', function() {
+				map.getCanvas().style.cursor = '';
+				popup.remove();
+			});
+		
+			
+	
 			map.resize();
 		});
 		
 		
 		
-		
-		$(document).on('mousedown touchstart', function(e){
-			var tgt = e.target;
-			
-			if( tgt.classList.contains('mapMarker') ){
-				tgt.classList.add('dragging');
-			}
-			
-		});
-		
-		$(document).on('mouseup touchend', function(e){
-			$('.mapMarker').removeClass('dragging');
+		$('.add-pointer').click( function(){
+			Object.assign(app.$data, defaultPointer); // default the pointer data
+			app.mode = 'create'; // will save a new pointer on form submit
+			app.form_shown = true; // shows the pointer form
 		});
 
 		$('.activate-pointer-form').click( function(){
-			$('#map-and-app').addClass( 'editing' );
+			app.form_shown = true;
 		});
 
-		$('.toggle-pointer-form').click( function(){
-			$('#map-and-app').toggleClass( 'paused' );
+		// the user clicked a pointer in the list. Fetch the pointer and commence editing
+		$('.pointer-list-item').click( function(){
+			// fetch the pointer and load it into our Vue instance
+			app.fetchPointer(this.dataset.id).then(
+				function(){
+					app.form_shown = true;					
+					app.mode = 'edit'; // will update the existing pointer on form submit
+				}
+			);
+			
 		});
 		
+		// we resize the map container when opening the pointer form, so we need to cal resize() to re-center the map
 		$(document).on('transitionend', function(e){
 			if( e.target.id == 'mapbox' )
 				window.map.resize();
+		});
+		
+		// we'll interrupt the submit event in order to handle submits from within our vue instance
+		$('#app form').on('submit', function(e){
+			e.stopPropagation();
+			
+			if( app.mode == "create" )
+				return; // we are in create mode, just let the form submit go through to laravel
+			//else
+			e.preventDefault();
+			app.savePointer(); // update instead
 		});
 
 	}

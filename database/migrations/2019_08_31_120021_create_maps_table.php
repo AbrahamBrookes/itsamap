@@ -16,6 +16,7 @@ class CreateMapsTable extends Migration
         Schema::create('maps', function (Blueprint $table) {
             $table->bigIncrements('id');
 			$table->string('name', 1024);
+			$table->boolean('published')->default(false);
             $table->timestamps();
         });
     }

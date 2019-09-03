@@ -59,6 +59,12 @@
       "css": "up-open",
       "code": 59446,
       "src": "fontawesome"
+    },
+    {
+      "uid": "12f4ece88e46abd864e40b35e05b11cd",
+      "css": "check",
+      "code": 59408,
+      "src": "fontawesome"
     }
   ]
 }
