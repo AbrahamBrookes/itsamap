@@ -45,9 +45,15 @@ class MapPointersController extends Controller
      */
     public function store(Request $request)
     {
-        $point = new \App\MapPointer();
-		$point->fill($request->all());
-		$point->save();
+        $pointer = new \App\MapPointer();
+		$pointer->fill($request->all());
+		$pointer->save();
+		
+		// handle image
+		$pointer->image()->create([
+			"handle" => $request->input('image_handle') // nullable
+		]);
+		
 		return redirect('/dashboard/maps/'.$request->map_id);
     }
 
@@ -60,7 +66,10 @@ class MapPointersController extends Controller
     public function show($id)
     {
         $pointer = \App\MapPointer::find($id);
-		return $pointer->toJson();
+		$image_handle = $pointer->image->handle;
+		$pointer = $pointer->toArray();
+		$pointer['image_handle'] = $image_handle;
+		return json_encode( $pointer );
     }
 
     /**
@@ -86,6 +95,12 @@ class MapPointersController extends Controller
         $pointer = \App\MapPointer::find($id);
         $pointer->fill($request->all());
 		$pointer->save();
+		
+		// handle image
+		$pointer->image()->update([
+			"handle" => $request->input('image_handle') // nullable
+		]);
+		
 		return 'success';
     }
 

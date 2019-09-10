@@ -15,7 +15,8 @@ class CreateImagesTable extends Migration
     {
         Schema::create('images', function (Blueprint $table) {
             $table->bigIncrements('id');
-			$table->string('handle', 1024); // filestack handle
+			$table->string('handle', 1024)->nullable(); // filestack handle
+			$table->integer('map_pointer_id'); // a link to a parent map pointer
             $table->timestamps();
         });
     }

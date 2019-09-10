@@ -2,6 +2,21 @@
 
 /* Breakpoints */
 
+/* Util */
+
+.relative {
+  position: relative;
+}
+
+form.login,
+form.register,
+#app,
+#mapbox {
+  border-radius: 4px;
+  box-shadow: 0px 13px 18px rgba(0, 0, 0, 0.05);
+  overflow: hidden;
+}
+
 /* Bootstrap */
 
 /*!
@@ -10670,8 +10685,44 @@ h6 {
   color: #000;
 }
 
-.relative {
-  position: relative;
+.fsp-drop-pane__container {
+  font-size: 0.8rem;
+}
+
+.fsp-drop-pane__icon.loading {
+  height: 48px;
+  width: 48px;
+  -webkit-animation: rotate 1.25s linear infinite;
+          animation: rotate 1.25s linear infinite;
+}
+
+@-webkit-keyframes rotate {
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes rotate {
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+.fsp-drop-pane__icon.loaded {
+  width: 100% !important;
+  margin: 0 !important;
+  position: relative !important;
+  height: 120px !important;
+}
+
+.fsp-drop-pane__text {
+  display: none;
+}
+
+.fsp-drop-pane__icon {
+  margin: 1.5em;
+  margin-top: 0.25em;
+  background-size: contain !important;
 }
 
 .checkbox {
@@ -10714,6 +10765,7 @@ h6 {
 .list-item {
   padding: 1.5em;
   display: block;
+  width: 100%;
 }
 
 .list-item:hover {
@@ -10728,14 +10780,6 @@ h6 {
 
 .list-item:last-of-type {
   border-bottom: none;
-}
-
-form.login,
-form.register,
-#app,
-#mapbox {
-  border-radius: 4px;
-  box-shadow: 0px 13px 18px rgba(0, 0, 0, 0.05);
 }
 
 nav {
@@ -10783,6 +10827,10 @@ header {
 #map-and-app #app i.icon-down-open {
   display: block;
   transition: all 0.3s;
+}
+
+#map-and-app:not(.editing) .mapMarker {
+  display: none;
 }
 
 @media (max-width: 991px) {

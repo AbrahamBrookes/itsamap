@@ -31,10 +31,30 @@ Route::prefix('dashboard')->middleware('auth')->group(function(){
 
 
 Route::get('/', function () {
-    return view('home');
+	
+	$maps = \App\Map::where('published', 1)->take(10)->get();
+	
+    return view('home')->with([
+		"maps" => $maps
+	]);
+	
 });
-Route::get('home', function () {
-    return view('home');
+
+Route::get('map/{id}', function ($id) {
+	
+	$map = \App\Map::find($id);
+	
+    return view('map')->with([
+		"map" => $map
+	]);
+});
+
+Route::get('geojson/{id}', function ($id) {
+	
+	$map = \App\Map::find($id);
+	
+    return $map->geojson();
+	
 });
 
 

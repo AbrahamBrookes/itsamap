@@ -66,6 +66,35 @@ const defaultPointer = {
 }
 
 
+window.addEventListener('DOMContentLoaded', function () {
+    const apikey = 'Agn7bjpJR4mGaonvvPrJbz';
+    const client = filestack.init(apikey);
+    const options = {
+		displayMode: 'dropPane',
+        container: '#filepicker',
+        maxFiles: 20,
+        uploadInBackground: false,
+		onFileUploadStarted: function(){
+			// user feedback, show a loading icon
+			$('.fsp-drop-pane__icon').attr( "style", 'background-image: url(img/img-upload-spinner.png)' );
+			$('.fsp-drop-pane__icon').removeClass('loaded');
+			$('.fsp-drop-pane__icon').addClass('loading');
+		},
+        onUploadDone: function(response){
+			var theImage = response.filesUploaded[0];
+			window.app.image_handle = theImage.handle;
+			// remove the loading icon
+			$('.fsp-drop-pane__icon').attr( "style", 'background-image: url(' + theImage.url + ')' );
+			$('.fsp-drop-pane__icon').removeClass('loading');
+			$('.fsp-drop-pane__icon').addClass('loaded');
+		}
+    };
+    const picker = client.picker(options);
+    picker.open();
+});
+
+
+
 document.addEventListener( 'DOMContentLoaded', function(){
 	if( $('#mapbox')[0] ){
 		
@@ -79,6 +108,7 @@ document.addEventListener( 'DOMContentLoaded', function(){
 				lat: defaultPointer.lat,
 				title: defaultPointer.title,
 				content: defaultPointer.content,
+				image_handle: null,
 				published: $('input[name="map_public"]').val(), // this feels lazy
 				form_shown: false,
 				pauseEdit: false,
@@ -109,6 +139,17 @@ document.addEventListener( 'DOMContentLoaded', function(){
 								window.map.flyTo({
 									center: [ self.lng, self.lat ]
 								});
+								// display the image in the upload image zone, if applicable
+								if( self.image_handle == null ){
+									$('.fsp-drop-pane__icon').attr( "style", '' );
+									$('.fsp-drop-pane__icon').removeClass('loading');
+									$('.fsp-drop-pane__icon').removeClass('loaded');
+								} else {
+									$('.fsp-drop-pane__icon').attr( "style", 'background-image: url(https://cdn.filestackcontent.com/' + self.image_handle + ')' );
+									$('.fsp-drop-pane__icon').removeClass('loading');
+									$('.fsp-drop-pane__icon').addClass('loaded');
+								}
+								
 								resolve(response.data); // resolve the promise and return the pointer data
 							}
 						)
@@ -133,9 +174,16 @@ document.addEventListener( 'DOMContentLoaded', function(){
 					let self = this;
 					self.published = status;
 					let map_id = $('input[name="map_id"]').val();
+					
+					// take a screenshot of the map a' la https://codepen.io/samsammurphy/pen/VXdOPv
+					var img = map.getCanvas().toDataURL();
+					
 					return new Promise((resolve, reject) => {
 						// save the given pointer to the server
-						axios.patch('/dashboard/maps/'+map_id, {'published':status}).then(
+						axios.patch('/dashboard/maps/'+map_id, {
+							'published':status,
+							'screenshot': img
+						}).then(
 							function(response){
 								self.published = status;
 								resolve(response);
@@ -152,7 +200,8 @@ document.addEventListener( 'DOMContentLoaded', function(){
 			container: 'mapbox',
 			style: 'mapbox://styles/a-brookes/ck03qitqx1cal1cqcrmvl454z',
 			center: [145.7781, -16.9186], // starting position
-			zoom: 11 // starting zoom
+			zoom: 11, // starting zoom
+			preserveDrawingBuffer: true
 		});
 		
 		
@@ -273,6 +322,11 @@ document.addEventListener( 'DOMContentLoaded', function(){
 		$('.add-pointer').click( function(){
 			Object.assign(app.$data, defaultPointer); // default the pointer data
 			app.mode = 'create'; // will save a new pointer on form submit
+			
+			$('.fsp-drop-pane__icon').attr( "style", '' ); // (rather clunkily) update the image dropzone
+			$('.fsp-drop-pane__icon').removeClass('loading');
+			$('.fsp-drop-pane__icon').removeClass('loaded');
+			
 			app.form_shown = true; // shows the pointer form
 		});
 

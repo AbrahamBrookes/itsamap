@@ -18,4 +18,8 @@ class MapPointer extends Model
 	public function map(){
 		return $this->belongsTo('\App\Map');
 	}
+	
+	public function image(){
+		return $this->hasOne('\App\Image');
+	}
 }

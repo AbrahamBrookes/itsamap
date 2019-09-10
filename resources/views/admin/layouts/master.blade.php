@@ -11,15 +11,18 @@
 
     <title>{{ config('app.name', 'It\'s a Map!') }}</title>
 
-    <!-- Scripts -->
-    <script src="{{ asset('js/admin.js') }}" defer></script>
-
     <!-- Fonts -->
     <link rel="dns-prefetch" href="//fonts.gstatic.com">
 	<link href="https://fonts.googleapis.com/css?family=Comfortaa:300,400,700&display=swap" rel="stylesheet">
 	
 	<!-- Icons -->
     <link href="{{ asset('css/admin-icons.css') }}" rel="stylesheet">
+	
+	<!-- Filestack -->
+	<script src="//static.filestackapi.com/filestack-js/3.x.x/filestack.min.js"></script>
+
+    <!-- Scripts -->
+    <script src="{{ asset('js/admin.js') }}" defer></script>
 	
     <!-- Styles -->
     <link href="{{ asset('css/admin.css') }}" rel="stylesheet">
