@@ -11,7 +11,7 @@ Display a map of your favourite places to your friends. Create map markers, uplo
  - Upload an image for your map pointer (using Filestack)
  
  #### Live version
- If it's up, a live version will be located at [iam.brookesy.dev](https://iam.brookesy.dev/)
+ If it's up, a live version will be located at [iam.brookesy.dev](https://iam.brookesy.dev/). Feel free to register a dummy account and vandalize it.
  
 ### Installation
  1. Clone this repo - `git clone https://github.com/AbrahamBrookes/itsamap.git`
