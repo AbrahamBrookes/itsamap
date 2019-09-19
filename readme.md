@@ -6,10 +6,12 @@ It's a map is a simple map site built on Laravel using Mapbox. This is meant as 
 Display a map of your favourite places to your friends. Create map markers, upload images and describe each map location in a nifty little digital map.
 
 #### Features
- - Create maps using the map editor. Each map will have its own url (using dynamic routing a'la Laravel)
+ - Edit your map with a cute little drag n drop interface (using MapboxGL-js)
  - Add map pointers to your map (using Eloquent models)
  - Upload an image for your map pointer (using Filestack)
- - Edit your map with a cute little drag n drop interface (using MapboxGL-js)
+ 
+ #### Live version
+ If it's up, a live version will be located at [iam.brookesy.dev](https://iam.brookesy.dev/)
  
 ### Installation
  1. Clone this repo - `git clone https://github.com/AbrahamBrookes/itsamap.git`
