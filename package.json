@@ -25,6 +25,6 @@
     },
     "dependencies": {
         "mapbox-gl": "^1.2.1",
-        "tinymce": "^5.1.4"
+        "tinymce": "^5.2.2"
     }
 }
