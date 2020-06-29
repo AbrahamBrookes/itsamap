@@ -23,6 +23,7 @@
 							<strong v-bind:class="{'d-none': mode != 'create'}">New pointer</strong>
 							<strong v-bind:class="{'d-none': mode == 'create'}">Edit pointer</strong>
 							<a href="javascript:void(0)" class="float-right d-lg-none" @click="pauseEdit = !pauseEdit"><i class=icon-down-open></i></a>
+							<a href="javascript:void(0)" class="float-right d-none d-lg-block" @click="form_shown = !form_shown"><i class=icon-cancel></i></a>
 						</p>
 						<p class=small>Change the location of this pointer by dragging the big marker around the map. Hit 'save' to save the markers location and details.</p>
 					

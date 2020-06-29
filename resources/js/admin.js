@@ -8,50 +8,19 @@ require('./bootstrap');
 
 window.Vue = require('vue');
 
-/**
- * The following block of code may be used to automatically register your
- * Vue components. It will recursively scan this directory for the Vue
- * components and automatically register them with their "basename".
- *
- * Eg. ./components/ExampleComponent.vue -> <example-component></example-component>
- */
-
-// const files = require.context('./', true, /\.vue$/i);
-// files.keys().map(key => Vue.component(key.split('/').pop().split('.')[0], files(key).default));
-/*
-Vue.component('example-component', require('./components/ExampleComponent.vue').default);
-
-/**
- * Next, we will create a fresh Vue application instance and attach it to
- * the page. Then, you may begin adding components to this application
- * or customize the JavaScript scaffolding to fit your unique needs.
- */
-/*
-const app = new Vue({
-    el: '#app',
-});
-*/
 import tinymce from 'tinymce/tinymce';
 import 'tinymce/themes/silver';
 import 'tinymce/skins/ui/oxide/skin.min.css';
+import VueMce from 'vue-mce';
+Vue.use(VueMce);
 
-/*
-tinymce.init({
-	selector: '.mce',
-	skin: false
-});
-*/
-	
-	import VueMce from 'vue-mce';
-	Vue.use(VueMce);
-
-	import mapboxgl from 'mapbox-gl/dist/mapbox-gl';
-	import 'mapbox-gl/dist/mapbox-gl.css';
+import mapboxgl from 'mapbox-gl/dist/mapbox-gl';
+import 'mapbox-gl/dist/mapbox-gl.css';
 
 
 
 /**
-	default lng lats
+	default objects to pass to our various mechanisms
 */
 const defaultLngLat = {
 	lng: 145.7709605789372,
@@ -64,14 +33,22 @@ const defaultPointer = {
 	title: '',
 	content: ''
 }
+/**
+	Set up globals
+*/
+window.itsamap = {
+	app: {},
+	map: {},
+	marker: {},
+}
 
-
-window.addEventListener('DOMContentLoaded', function () {
+// filestack
+document.addEventListener('DOMContentLoaded', function () {
     const apikey = 'Agn7bjpJR4mGaonvvPrJbz';
     const client = filestack.init(apikey);
     const options = {
 		displayMode: 'dropPane',
-        container: '#filepicker',
+        container: '#filepicker', // the drop pane in our map pointer form
         maxFiles: 20,
         uploadInBackground: false,
 		onFileUploadStarted: function(){
@@ -80,9 +57,9 @@ window.addEventListener('DOMContentLoaded', function () {
 			$('.fsp-drop-pane__icon').removeClass('loaded');
 			$('.fsp-drop-pane__icon').addClass('loading');
 		},
-        onUploadDone: function(response){
+        onUploadDone: function(response){ // save the handle to our vue instance, which will take care of the rest
 			var theImage = response.filesUploaded[0];
-			window.app.image_handle = theImage.handle;
+			itsamap.app.image_handle = theImage.handle;
 			// remove the loading icon
 			$('.fsp-drop-pane__icon').attr( "style", 'background-image: url(' + theImage.url + ')' );
 			$('.fsp-drop-pane__icon').removeClass('loading');
@@ -98,9 +75,12 @@ window.addEventListener('DOMContentLoaded', function () {
 document.addEventListener( 'DOMContentLoaded', function(){
 	if( $('#mapbox')[0] ){
 		
-		
-		
-		window.app = new Vue({
+		/**
+			We'll use a vue instance to handle our interactions with the map, the data on the page, and laravel.
+			We will only ever keep track of one pointer at a time so we will fetch pointers as we need them.
+			The vue instance will handle saving and updating display data.
+		*/
+		itsamap.app = new Vue({
 			el: '#map-and-app',
 			data: {
 				id: defaultPointer.id,
@@ -109,7 +89,7 @@ document.addEventListener( 'DOMContentLoaded', function(){
 				title: defaultPointer.title,
 				content: defaultPointer.content,
 				image_handle: null,
-				published: $('input[name="map_public"]').val(), // this feels lazy
+				published: $('input[name="map_public"]').val(),
 				form_shown: false,
 				pauseEdit: false,
 				mode: 'create',
@@ -135,8 +115,8 @@ document.addEventListener( 'DOMContentLoaded', function(){
 								// assign the data
 								Object.assign(self.$data, response.data);
 								// show the marker
-								window.marker.setLngLat([ self.lng, self.lat ]);
-								window.map.flyTo({
+								itsamap.marker.setLngLat([ self.lng, self.lat ]);
+								itsamap.map.flyTo({
 									center: [ self.lng, self.lat ]
 								});
 								// display the image in the upload image zone, if applicable
@@ -175,8 +155,9 @@ document.addEventListener( 'DOMContentLoaded', function(){
 					self.published = status;
 					let map_id = $('input[name="map_id"]').val();
 					
-					// take a screenshot of the map a' la https://codepen.io/samsammurphy/pen/VXdOPv
-					var img = map.getCanvas().toDataURL();
+					// take a screenshot of the map, and save the data string on the DB
+					// I really can't figure out any other way to handle screenshotting the map
+					var img = itsamap.map.getCanvas().toDataURL();
 					
 					return new Promise((resolve, reject) => {
 						// save the given pointer to the server
@@ -196,16 +177,16 @@ document.addEventListener( 'DOMContentLoaded', function(){
 		
 		
 		mapboxgl.accessToken = 'pk.eyJ1IjoiYS1icm9va2VzIiwiYSI6ImNqenRmajM0cTA0dnMzYm55NG9iNWc4cmEifQ.T_9Qw2CRjJntF5eyn2sIKg';
-		window.map = new mapboxgl.Map({
+		itsamap.map = new mapboxgl.Map({
 			container: 'mapbox',
-			style: 'mapbox://styles/a-brookes/ck03qitqx1cal1cqcrmvl454z',
+			style: 'mapbox://styles/a-brookes/ck0eyk0a40pg01cpj01yqdm2p',
 			center: [145.7781, -16.9186], // starting position
 			zoom: 11, // starting zoom
 			preserveDrawingBuffer: true
 		});
 		
 		
-		map.on('load', function(){
+		itsamap.map.on('load', function(){
 			
 			// we will add a single HTML marker to the map
 			// which the user can use to interact with whatever
@@ -216,17 +197,17 @@ document.addEventListener( 'DOMContentLoaded', function(){
 			marker.id = "the-map-marker";
 			marker.classList.add('mapMarker');
 			markerWrap.appendChild( marker );
-			window.marker = new mapboxgl.Marker({
+			itsamap.marker = new mapboxgl.Marker({
 				element: markerWrap,
 				draggable: true,
 				anchor: 'bottom'
 			})
 			.on('dragend', function(e){
-				app.lng = this._lngLat.lng;
-				app.lat = this._lngLat.lat;
+				itsamap.app.lng = this._lngLat.lng;
+				itsamap.app.lat = this._lngLat.lat;
 			})
-			.setLngLat([app.lng, app.lat])
-			.addTo(map);
+			.setLngLat([itsamap.app.lng, itsamap.app.lat])
+			.addTo(itsamap.map);
 			
 			// we'll also add a layer with all the map markers a' la
 			// https://docs.mapbox.com/mapbox-gl-js/example/popup-on-hover/
@@ -256,7 +237,7 @@ document.addEventListener( 'DOMContentLoaded', function(){
 					}
 				});
 			});
-			map.addLayer({
+			itsamap.map.addLayer({
 				id: 'allPointers',
 				type: 'symbol',
 				// Add a GeoJSON source containing place coordinates and information.
@@ -265,19 +246,19 @@ document.addEventListener( 'DOMContentLoaded', function(){
 					data: pointers
 				},
 				layout: {
-					'icon-image': 'marker-15',
+					'icon-image': 'mapPointer',
 					'icon-allow-overlap': true,
 				}
 			});
 			
 			
 			// when we click on a pointer on the map, show the edit form for that pointer
-			map.on('click', 'allPointers', function(e) {
+			itsamap.map.on('click', 'allPointers', function(e) {
 				var pointerid = e.features[0].properties.id;
-				app.fetchPointer(pointerid).then(
+				itsamap.app.fetchPointer(pointerid).then(
 					function(){
-						app.form_shown = true;					
-						app.mode = 'edit'; // will update the existing pointer on form submit
+						itsamap.app.form_shown = true;					
+						itsamap.app.mode = 'edit'; // will update the existing pointer on form submit
 					}
 				);
 			});
@@ -287,9 +268,9 @@ document.addEventListener( 'DOMContentLoaded', function(){
 				closeButton: false,
 				closeOnClick: false
 			});
-			map.on('mouseenter', 'allPointers', function(e) {
+			itsamap.map.on('mouseenter', 'allPointers', function(e) {
 				// Change the cursor style as a UI indicator.
-				map.getCanvas().style.cursor = 'pointer';
+				itsamap.map.getCanvas().style.cursor = 'pointer';
 				 
 				var coordinates = e.features[0].geometry.coordinates.slice();
 				var title = e.features[0].properties.title;
@@ -305,29 +286,29 @@ document.addEventListener( 'DOMContentLoaded', function(){
 				// based on the feature found.
 				popup.setLngLat(coordinates)
 				.setHTML('<h5 class=m-0>' + title + '<h5>')
-				.addTo(map);
+				.addTo(itsamap.map);
 			});
-			map.on('mouseleave', 'allPointers', function() {
-				map.getCanvas().style.cursor = '';
+			itsamap.map.on('mouseleave', 'allPointers', function() {
+				itsamap.map.getCanvas().style.cursor = '';
 				popup.remove();
 			});
 		
 			
 	
-			map.resize();
+			itsamap.map.resize();
 		});
 		
 		
 		
 		$('.add-pointer').click( function(){
-			Object.assign(app.$data, defaultPointer); // default the pointer data
-			app.mode = 'create'; // will save a new pointer on form submit
+			Object.assign(itsamap.app.$data, defaultPointer); // default the pointer data
+			itsamap.app.mode = 'create'; // will save a new pointer on form submit
 			
 			$('.fsp-drop-pane__icon').attr( "style", '' ); // (rather clunkily) update the image dropzone
 			$('.fsp-drop-pane__icon').removeClass('loading');
 			$('.fsp-drop-pane__icon').removeClass('loaded');
 			
-			app.form_shown = true; // shows the pointer form
+			itsamap.app.form_shown = true; // shows the pointer form
 		});
 
 		$('.activate-pointer-form').click( function(){
@@ -349,7 +330,7 @@ document.addEventListener( 'DOMContentLoaded', function(){
 		// we resize the map container when opening the pointer form, so we need to cal resize() to re-center the map
 		$(document).on('transitionend', function(e){
 			if( e.target.id == 'mapbox' )
-				window.map.resize();
+				itsamap.map.resize();
 		});
 		
 		// we'll interrupt the submit event in order to handle submits from within our vue instance

@@ -9,14 +9,14 @@ import 'mapbox-gl/dist/mapbox-gl.css';
 
 document.addEventListener( 'DOMContentLoaded', function(){
 	
-	
-	
 	const mapid = document.querySelector('#mapid').value;
 	
+	
+	// init the map
 	mapboxgl.accessToken = 'pk.eyJ1IjoiYS1icm9va2VzIiwiYSI6ImNqenRmajM0cTA0dnMzYm55NG9iNWc4cmEifQ.T_9Qw2CRjJntF5eyn2sIKg';
 	window.map = new mapboxgl.Map({
 		container: 'mapbox',
-		style: 'mapbox://styles/a-brookes/ck03qitqx1cal1cqcrmvl454z',
+		style: 'mapbox://styles/a-brookes/ck0eyk0a40pg01cpj01yqdm2p',
 		center: [145.7781, -16.9186], // starting position
 		zoom: 11, // starting zoom
 		preserveDrawingBuffer: true
@@ -25,16 +25,16 @@ document.addEventListener( 'DOMContentLoaded', function(){
 
 	map.on('load', function(){
 		
+		// add a layer containing our existing map pointers
 		map.addLayer({
 			id: 'allPointers',
 			type: 'symbol',
-			// Add a GeoJSON source containing place coordinates and information.
 			source: {
 				type: 'geojson',
-				data: '/geojson/'+mapid
+				data: '/geojson/'+mapid // our geojson endpoint, runs Map->geojson
 			},
 			layout: {
-				'icon-image': 'marker-15',
+				'icon-image': 'mapPointer',
 				'icon-allow-overlap': true,
 			}
 		});
@@ -43,6 +43,7 @@ document.addEventListener( 'DOMContentLoaded', function(){
 		map.on('click', 'allPointers', function(e) {
 			var pointer = e.features[0].properties;
 			
+			// update and show the display panel
 			// I could totally use vue for this but ehh, why the overhead? I don't even have jquery loaded
 			document.querySelector('#pointer-display').dataset.display = "true";
 			document.querySelectorAll('#pointer-display .title')[0].innerText = pointer.title;
@@ -71,12 +72,11 @@ document.addEventListener( 'DOMContentLoaded', function(){
 			}
 		 
 			// Populate the popup and set its coordinates
-			// based on the feature found.
 			popup.setLngLat(coordinates)
 			.setHTML('<h5 class=m-0>' + title + '<h5>')
 			.addTo(map);
 		});
-		map.on('mouseleave', 'allPointers', function() {
+		map.on('mouseleave', 'allPointers', function() { // remove the popup
 			map.getCanvas().style.cursor = '';
 			popup.remove();
 		});
@@ -85,8 +85,8 @@ document.addEventListener( 'DOMContentLoaded', function(){
 	});
 	
 	
-	document.getElementById( 'close-display' ).addEventListener( 'click', function(){
-		document.querySelector('#pointer-display').dataset.display = "false";
+	document.getElementById( 'close-display' ).addEventListener( 'click', function(){ // vanilla js
+		document.getElementById('pointer-display').dataset.display = "false";
 	});
 	
 	
